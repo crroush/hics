@@ -168,7 +168,7 @@ DEM_CATALOG = _DEM_CATALOG(
 GSD_MISSING_COLLECTIONS = {"nasadem", "io-lulc-annual-v02"}
 
 
-class GeoTIFFIndex(Singleton):
+class GeoTIFFIndex(metaclass=Singleton):
     """
     Manages the spatial index (R-tree) of local GeoTIFF files
     for fast spatial querying and coverage checks.

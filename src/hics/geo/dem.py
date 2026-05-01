@@ -217,7 +217,7 @@ def load_geotiffs(
     return data
 
 
-class _Terrain(Singleton):
+class _Terrain(metaclass=Singleton):
     """Container class for terrain data.
     Contains both digital elevation model (DEM) and land cover data.
     """
