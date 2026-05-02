@@ -48,7 +48,9 @@ def determine_num_samples(
     return round((-1 / ((stretch * distance_m) + (1 / (upper_limit - lower_limit)))) + upper_limit)
 
 
-def get_surface_profile(tx_cs: HCS, rx_cs: HCS, lc_skip_ind: int | None = None) -> xr.Dataset:
+def get_surface_profile(
+    tx_cs: HCS, rx_cs: HCS, lc_skip_ind: int | None = None, **kwargs: Any
+) -> xr.Dataset:
     """
     Get the surface profile between the two coordinate systems.
 
@@ -60,7 +62,13 @@ def get_surface_profile(tx_cs: HCS, rx_cs: HCS, lc_skip_ind: int | None = None) 
         rx Coordinate system to determine profile between.
     lc_skip_ind : int | None
         Index of the land cover class to skip in the interpolation.
+    **kwargs
+        isel data on tx and rx.
     """
+    # Slice the HCS early, before the expensive profile computation
+    if kwargs:
+        tx_cs = tx_cs.isel(**kwargs)
+        rx_cs = rx_cs.isel(**kwargs)
     # Self if assume to be transmitter or starting point of the profile
     tx = list(tx_cs.llh) + [tx_cs.hagl]
     # Other is then the receiver

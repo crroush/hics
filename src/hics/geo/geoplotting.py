@@ -69,12 +69,7 @@ def view_surface_profile(
     Additional kwargs to down-select surface profiles with temporal dependence.
     """
     # Get the surface profile
-    surface_profile = get_surface_profile(tx_cs, rx_cs, lc_skip_ind=lc_skip_ind)
-    # Down-select if kwargs specified
-    if len(kwargs) > 0:
-        surface_profile = surface_profile.isel(**kwargs)
-        for s in ["surface_profile", "lc_profile", "lc_nlcd"]:
-            surface_profile[s] = surface_profile[s].item()
+    surface_profile = get_surface_profile(tx_cs, rx_cs, lc_skip_ind=lc_skip_ind, **kwargs)
 
     # Plot the surface line
     surface_profile.surface_profile.plot(color="k", label="Surface", ax=ax)
@@ -272,7 +267,7 @@ def airplane_marker():
 def plotnlcd(pts: list | None = None):
     """Plot NLCD data with correct colors."""
     # Load data
-    DEM.load(pts)
+    DEM.load_lc(pts)
     # colormap determination and setting bounds
     full_indices = DEM.nlcd_legend["Value"].values
     full_colors = DEM.nlcd_legend["rgbint"].values

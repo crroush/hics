@@ -61,7 +61,6 @@ def test_fromcrs_boulder():
         coords=_POSITION_COORD_DICT,
     )
     # Ensure correct DEM
-    DEM.dem_asset = DEM_CATALOG.USGS30
     cs_boulder = HCS.from_crs(
         (40.015 * ureg.degree, -105.270556 * ureg.degree, 20 * ureg.m), hagl=True
     )

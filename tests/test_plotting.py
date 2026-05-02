@@ -40,7 +40,7 @@ warnings.showwarning = warn_with_traceback
 warnings.simplefilter("always")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def setupcs():
     cs_boulder = HCS.from_crs(
         (40.015 * ureg.degree, -105.270556 * ureg.degree, 20 * ureg.m), hagl=True
@@ -48,7 +48,7 @@ def setupcs():
     yield cs_boulder
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def setupracetrack():
     center = (40.037578, -105.228117) * ureg.degree
     width = 1.5 * ureg.km

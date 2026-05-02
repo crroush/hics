@@ -202,7 +202,7 @@ class HCSRotation:
     @property
     def data(self) -> xr.DataArray:
         """Return data as Rotation objects."""
-        pass
+        raise NotImplementedError
 
     def apply(self, origindata: HCSOrigin | xr.DataArray, inverse: bool = False) -> xr.DataArray:
         """
@@ -402,9 +402,6 @@ class HCS:
     def clear_cache(self) -> None:
         """Clear cache by initializing private variables."""
         self.__global_position = None
-        self._reference_tree = None
-        self._origin_tree = None
-        self._rotation_tree = None
         self._llh = None
         self._hagl = None
 
@@ -487,45 +484,24 @@ class HCS:
     @property
     def reference_tree(self) -> list:
         """Get hierarchical list of references."""
-        if self._reference_tree is None:
-            if self.reference is not None and isinstance(self.reference, HCS):
-                refs = [self] + self.reference.reference_tree
-                self._reference_tree = refs
-            else:
-                self._reference_tree = [self]
-        return self._reference_tree
+        if self.reference is not None and isinstance(self.reference, HCS):
+            return [self] + self.reference.reference_tree
+
+        return [self]
 
     @property
     def origin_tree(self) -> list:
         """Get hierarchical list of origins."""
-        if self._origin_tree is None:
-            if self.reference is not None and isinstance(self.reference, HCS):
-                origins = self.reference.origin_tree + [self.origin]
-                self._origin_tree = origins
-            else:
-                self._origin_tree = [self.origin]
-        return self._origin_tree
+        if self.reference is not None and isinstance(self.reference, HCS):
+            return self.reference.origin_tree + [self.origin]
+        return [self.origin]
 
     @property
     def rotation_tree(self) -> list:
         """Get hierarchical list of Rotations."""
-        if self._rotation_tree is None:
-            if self.reference is not None and isinstance(self.reference, HCS):
-                rots = self.reference.rotation_tree + [self.rotation]
-                self._rotation_tree = rots
-            else:
-                self._rotation_tree = [self.rotation]
-        return self._rotation_tree
-
-    def _calc_llh(self):
-        gp = self.global_position
-        llh = geocent2llh.transform(
-            gp.sel(position="x"), gp.sel(position="y"), gp.sel(position="z")
-        )
-        _llh = []
-        for l in llh:
-            _llh.append(l.drop_vars("position"))
-        return _llh
+        if self.reference is not None and isinstance(self.reference, HCS):
+            return self.reference.rotation_tree + [self.rotation]
+        return [self.rotation]
 
     @property
     @wraps_xr((ureg.degree, ureg.degree, ureg.m), None)
@@ -576,6 +552,24 @@ class HCS:
         newrotation = self.rotation.interp(time=time)
 
         return HCS(neworigin, newrotation)
+
+    def isel(self, missing_dims="ignore", **kwargs) -> HCS:
+        """Index-select along a dimension, returning a new HCS."""
+        return self._xrfunc("isel", missing_dims=missing_dims, **kwargs)
+
+    def sel(self, missing_dims="ignore", **kwargs) -> HCS:
+        """Select along a dimension, returning a new HCS."""
+        return self._xrfunc("sel", missing_dims=missing_dims, **kwargs)
+
+    def _xrfunc(self, func, **kwargs) -> HCS:
+        """Apply function to HCSOrigin and HCSRotation basemag data."""
+        o_func = getattr(self.origin.basemag, func)
+        r_func = getattr(self.rotation.basemag, func)
+        new_origin = HCSOrigin(o_func(**kwargs))
+        new_origin.original_units = self.origin.original_units
+        new_origin.base_units = self.origin.base_units
+        new_rotation = HCSRotation(r_func(**kwargs))
+        return HCS(new_origin, new_rotation, reference=self.reference, name=self.name)
 
     def relative_position(self, other_hcs: HCS | xr.DataArray):
         """Determine position of other_hcs in self HCS."""

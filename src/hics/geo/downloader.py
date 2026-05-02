@@ -35,13 +35,6 @@ class BoundingBox:
     max_lat: float
     max_lon: float
 
-    def __post_init__(self):
-        # Ensure min/max are correct, though constructor handles it if points are ordered
-        self.min_lat = min(self.min_lat, self.max_lat)
-        self.max_lat = max(self.min_lat, self.max_lat)
-        self.min_lon = min(self.min_lon, self.max_lon)
-        self.max_lon = max(self.min_lon, self.max_lon)
-
     def __init__(self, points: list[tuple[float, float]]) -> None:
         """
         Initializes a BoundingBox from a list of (lat, lon) points.
@@ -168,7 +161,7 @@ DEM_CATALOG = _DEM_CATALOG(
 GSD_MISSING_COLLECTIONS = {"nasadem", "io-lulc-annual-v02"}
 
 
-class GeoTIFFIndex(metaclass=Singleton):
+class GeoTIFFIndex:
     """
     Manages the spatial index (R-tree) of local GeoTIFF files
     for fast spatial querying and coverage checks.
@@ -188,12 +181,17 @@ class GeoTIFFIndex(metaclass=Singleton):
         # Ensure cache directory exists
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        # Rtree index file paths
-        self.index_base = self.cache_dir / "dem_index"
-
-        # JSON file to map R-tree internal IDs to file metadata
-        self.metadata_map_path = self.cache_dir / "dem_index_map.json"
         self._INDEXSETUP = False
+
+    @property
+    def index_base(self) -> Path:
+        """Rtree index file."""
+        return self.cache_dir / "dem_index"
+
+    @property
+    def metadata_map_path(self) -> Path:
+        """JSON file to map R-tree internal IDs to file metadata."""
+        return self.cache_dir / "dem_index_map.json"
 
     def setupindex(self) -> None:
         """Create the index."""

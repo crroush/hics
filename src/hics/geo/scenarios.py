@@ -156,13 +156,13 @@ def interp_llpnts2hcs(
                             )
                         )
                         # Create rotation object
-                        bank_rots[rots[-1]] = Rotation.from_euler(
+                        bank_rots[len(rots) - 1] = Rotation.from_euler(
                             "XZX", [rot_sgn * bank_angle.to("degree").magnitude, 0, 0], degrees=True
                         )
 
         # Compound the rotation to add in bank
-        for k, v in bank_rots.items():
-            rots[rots.index(k)] = v * rots[rots.index(k)]
+        for idx, v in bank_rots.items():
+            rots[idx] = v * rots[idx]
 
         # Increment start time
         loop_start = isotime[-1][-1] + np.cumsum(elapsed_time.magnitude).astype("timedelta64[s]")[1]
