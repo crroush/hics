@@ -1,0 +1,47 @@
+name: Bump Version & Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      part:
+        description: 'Level to bump (patch, minor, major)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  bump-and-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Bump Version
+        run: |
+          uv version --bump ${{ github.event.inputs.part }}
+          NEW_V=$(uv version --short)
+          echo "NEW_V=$NEW_V" >> $GITHUB_ENV
+
+      - name: Commit and Push
+        run: |
+          git add pyproject.toml
+          git commit -m "chore: bump version to ${{ env.NEW_V }}"
+          git tag "v${{ env.NEW_V }}"
+          git push origin HEAD:${{ github.ref_name }} --follow-tags
