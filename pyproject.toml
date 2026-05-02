@@ -1,7 +1,7 @@
 
 [project]
 name = "hics"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python package for handling hierarchical coordinate systems."
 authors = [{ name = "Rob Scheeler"}]
 readme = "README.md"
