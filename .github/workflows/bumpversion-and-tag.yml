@@ -1,4 +1,4 @@
-name: Bump Version & Tag
+name: Bump Version
 
 on:
   workflow_dispatch:
@@ -16,12 +16,14 @@ on:
 jobs:
   bump-and-tag:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
