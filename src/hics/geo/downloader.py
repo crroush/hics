@@ -19,7 +19,6 @@ from loguru import logger
 from rasterio.warp import transform_bounds
 from rtree import index
 from tqdm import tqdm
-from xrench.utils import Singleton
 
 from .config import DEM_SETTINGS
 

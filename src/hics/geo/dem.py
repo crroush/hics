@@ -19,7 +19,6 @@ from odc.geo.xr import xr_reproject
 from rasterio.enums import Resampling
 from rioxarray import open_rasterio
 from xrench.units import ureg
-from xrench.utils import Singleton
 from xrench.xrutils import kw2da
 
 from .config import DEM_SETTINGS
