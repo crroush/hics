@@ -571,8 +571,8 @@ class HCS:
         new_rotation = HCSRotation(r_func(**kwargs))
         return HCS(new_origin, new_rotation, reference=self.reference, name=self.name)
 
-    def relative_position(self, other_hcs: HCS | xr.DataArray):
-        """Determine position of other_hcs in self HCS."""
+    def relative_position_basemag(self, other_hcs: HCS | xr.DataArray):
+        """Determine position of other_hcs in self HCS in base magnitude."""
         if isinstance(other_hcs, HCS):
             oc = other_hcs._global_position.basemag
         else:
@@ -588,6 +588,13 @@ class HCS:
             rot_prod *= rot
         # Apply rotation to the relative position
         pos = rot_prod.apply(r_pos)
+
+        return pos
+
+    def relative_position(self, other_hcs: HCS | xr.DataArray):
+        """Determine position of other_hcs in self HCS."""
+        # Basemag relative position
+        pos = self.relative_position_basemag(other_hcs)
         # Add units back
         pos = self.origin.apply_units(pos)
 
