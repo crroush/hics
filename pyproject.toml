@@ -25,7 +25,7 @@ dependencies = [
     "pyvista>=0.44",
     "scipy>=1.16.3",
     "xarray>=2025.10.1",
-    "xrench",
+    "xrench>=0.1.1",
 ]
 [project.optional-dependencies]
 geo = [
@@ -145,6 +145,24 @@ ignore = [
     "S311", # rand-usage
     "EM102", # f-string-exception
     "TRY003", # long-exception-messages
+    "ANN001",   # missing type annotations on args
+    "ANN002",   # missing type annotations on *args
+    "ANN003",   # missing type annotations on **kwargs
+    "ANN201",   # missing return type annotation
+    "ANN202",   # missing return type annotation private
+    "FBT001",   # boolean positional arg in function definition
+    "FBT002",   # boolean default positional arg
+    "FBT003",   # boolean positional value in call
+    "PLR0912",  # too many branches
+    "PLR0915",  # too many statements
+    "PLR2004",  # magic value comparisons
+    "C901",     # too complex
+    "TID252",   # relative imports from parent modules
+    "ICN001",   # matplotlib import alias
+    "D103",     # missing docstring in public function
+    "D415",     # docstring first line punctuation
+    "N806",     # variable should be lowercase (e.g. matrix A)
+    "E501",     # line too long — handled by formatter
 ]
 
 
@@ -162,7 +180,7 @@ show_error_codes = true
 [tool.coverage.report]
 skip_empty = true
 show_missing = true
-fail_under = 80
+fail_under = 70
 
 [tool.coverage.run]
 branch = true

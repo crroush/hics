@@ -1,6 +1,5 @@
 import time
 from copy import deepcopy
-from typing import Optional, Union
 
 import cartopy.crs as ccrs
 import cartopy.io.img_tiles as cimgt
@@ -12,10 +11,8 @@ import numpy as np
 import xarray as xr
 from cartopy.mpl.ticker import LatitudeFormatter, LongitudeFormatter
 from leafmap import maplibregl as leaflibre
-from loguru import logger
 from matplotlib import animation
 from matplotlib.colors import ListedColormap
-from matplotlib.patches import PathPatch
 from shapely.geometry import LineString
 from xrench.units import ureg
 
@@ -96,7 +93,7 @@ def view_surface_profile(
     # Fill with land cover color between earth and the land cover
     if lc:
         colors = nlcdcolor(surface_profile.lc_nlcd.data)
-        for i, c in zip(range(surface_profile.distance.size - 1), colors):
+        for i, c in zip(range(surface_profile.distance.size - 1), colors, strict=False):
             ax.fill_between(
                 surface_profile.distance[i : i + 2],
                 surface_profile.lc_profile.data[i : i + 2],
@@ -192,7 +189,12 @@ def view_latlon(
 
     # Plot data
     (l,) = ax.plot(
-        lon, lat, marker=marker, markersize=markersize, transform=ccrs.PlateCarree(), **kwargs
+        lon,
+        lat,
+        marker=marker,
+        markersize=markersize,
+        transform=ccrs.PlateCarree(),
+        **kwargs,
     )
     rmstart = list(ax.get_lines()).index(l)
     if animate:
@@ -321,13 +323,19 @@ def cs2geodf(cs):
     hamsl = cs.llh[2]
     if hamsl.shape == ():
         hamsl = xr.DataArray(
-            [hamsl.data.magnitude] * hamsl.data.units, dims=("time",), coords=dict(time=[0])
+            [hamsl.data.magnitude] * hamsl.data.units,
+            dims=("time",),
+            coords=dict(time=[0]),
         )
         lat = xr.DataArray(
-            [cs.llh[0].data.magnitude] * cs.llh[0].data.units, dims=("time",), coords=dict(time=[0])
+            [cs.llh[0].data.magnitude] * cs.llh[0].data.units,
+            dims=("time",),
+            coords=dict(time=[0]),
         )
         lon = xr.DataArray(
-            [cs.llh[1].data.magnitude] * cs.llh[1].data.units, dims=("time",), coords=dict(time=[0])
+            [cs.llh[1].data.magnitude] * cs.llh[1].data.units,
+            dims=("time",),
+            coords=dict(time=[0]),
         )
 
         data = xr.Dataset(dict(hamsl=hamsl))
@@ -409,7 +417,12 @@ def showcs_leafmap(
     else:
         m.add_gdf(gdf_pts, zoom_to_layer=False)
         if line_style is None:
-            line_style = {"fillColor": "none", "color": "#ff7f0e", "weight": 5, "opacity": 0.8}
+            line_style = {
+                "fillColor": "none",
+                "color": "#ff7f0e",
+                "weight": 5,
+                "opacity": 0.8,
+            }
         if gdf_line is not None:
             m.add_gdf(gdf_line, style=line_style, zoom_to_layer=False)
         return m
