@@ -46,8 +46,8 @@ geo = [
     "pyproj>=3.7.2",
     "rioxarray>=0.19.0",
     "aiofiles>=25.1.0",
-    # GDAL Python bindings must match the installed system libgdal.
-    # Install them after system GDAL is present, e.g. `gdal==$(gdal-config --version)`.
+    # GDAL Python bindings must match the native libgdal installed for the environment.
+    # Install GDAL via conda-forge or install matching bindings after system GDAL is present.
     "nest_asyncio",
     "odc-geo",
     "skyfield",

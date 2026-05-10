@@ -8,41 +8,45 @@ on:
       - master
 
 jobs:
-  ubuntu-2404-build:
-    name: Build with Ubuntu 24.04 system GDAL
-    runs-on: ubuntu-24.04
+  geospatial-smoke:
+    name: Geospatial smoke on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-24.04
+          - macos-latest
+          - windows-latest
+
+    defaults:
+      run:
+        shell: bash -el {0}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up conda geospatial environment
+        uses: conda-incubator/setup-miniconda@v3
         with:
+          activate-environment: hics-ci
           python-version: "3.12"
+          channels: conda-forge
+          channel-priority: strict
+          auto-update-conda: false
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: "0.7.22"
+      - name: Install native geospatial dependencies
+        run: conda install -y gdal libspatialindex
 
-      - name: Install Ubuntu GDAL packages
+      - name: Install Python package dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends gdal-bin libgdal-dev libspatialindex-dev
-          echo "GDAL_VERSION=$(gdal-config --version)" >> "$GITHUB_ENV"
-          gdal-config --version
-
-      - name: Install Python dependencies
-        run: uv sync --extra geo --dev
-
-      - name: Install matching GDAL Python bindings
-        run: |
-          uv pip install "gdal==${GDAL_VERSION}"
-          uv run python -c "from osgeo import gdal; print(gdal.VersionInfo('--version'))"
+          python -m pip install --upgrade pip
+          python -m pip install uv==0.7.22
+          uv pip install --system --extra geo .
 
       - name: Build package
         run: uv build
 
-      - name: Smoke test package import
-        run: uv run python -c "import hics; from osgeo import gdal; print(gdal.VersionInfo('--version'))"
+      - name: Smoke test package and GDAL imports
+        run: python -c "import hics; from osgeo import gdal; print(gdal.VersionInfo('--version'))"

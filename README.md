@@ -2,8 +2,18 @@
 ```hics``` is a Python package for handling hierarchical coordinate systems (HCS). It allows you to define relative transformations (translation and rotation) between frames and automatically resolves them to global positions (ECEF) or relative positions between any two frames in the tree.
 
 
-## Ubuntu geospatial install note
-GDAL's Python bindings must match the installed system `libgdal` version. On Ubuntu, install system GDAL first, then install the matching Python bindings before using geospatial features:
+## Geospatial install note
+GDAL is a native library. Its Python bindings must match the installed `libgdal` version, so the `geo` extra intentionally does not install `gdal` directly.
+
+For a cross-platform setup, use a geospatial package manager such as conda-forge:
+
+```bash
+conda create -n hics-geo -c conda-forge python=3.12 gdal libspatialindex
+conda activate hics-geo
+uv sync --extra geo --dev
+```
+
+For Ubuntu system packages, install system GDAL first, then install matching Python bindings:
 
 ```bash
 sudo apt-get update
@@ -11,8 +21,6 @@ sudo apt-get install -y gdal-bin libgdal-dev libspatialindex-dev
 uv sync --extra geo --dev
 uv pip install "gdal==$(gdal-config --version)"
 ```
-
-The `geo` extra intentionally does not install `gdal` directly because a hard-coded Python GDAL version can fail when it does not match the operating system's `libgdal`.
 
 ## Core Concepts
 ### 1. Defining a Coordinate System
