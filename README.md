@@ -7,7 +7,7 @@ The geospatial extra uses GDAL's Python bindings. On Ubuntu 24.04, the `libgdal-
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y gdal-bin libgdal-dev
+sudo apt-get install -y gdal-bin libgdal-dev libspatialindex-dev
 uv sync --extra geo --dev
 ```
 
