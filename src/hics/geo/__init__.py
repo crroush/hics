@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import platform
 import shutil
 import subprocess
 
@@ -15,6 +16,10 @@ On Ubuntu, install system GDAL first, then install the matching Python bindings:
     sudo apt-get update
     sudo apt-get install -y gdal-bin libgdal-dev libspatialindex-dev
     uv pip install "gdal==$(gdal-config --version)"
+
+On Windows or macOS, use a geospatial distribution such as conda-forge, or install
+GDAL with your platform package manager first and then install Python bindings
+that match that GDAL version.
 
 If you are not using uv, run the equivalent command in the active environment:
 
@@ -63,6 +68,8 @@ def geospatial_install_message() -> str:
     system_gdal = _system_gdal_version()
     if system_gdal is not None:
         message += f"\nDetected system GDAL version: {system_gdal}.\n"
+    else:
+        message += f"\nNo gdal-config executable was detected on {platform.system()}.\n"
 
     return message
 

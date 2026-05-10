@@ -14,6 +14,10 @@ uv pip install "gdal==$(gdal-config --version)"
 
 `hics` intentionally does not list `gdal` as a normal Python dependency because the correct version depends on the system `libgdal` already installed. If GDAL is missing when geospatial APIs such as `HCS.from_crs(...)` are used, hics raises an actionable `ImportError` with these installation commands instead of failing later with a low-level `osgeo` import or ABI error.
 
+
+### Cross-platform CI and GDAL support
+The base package is tested on Ubuntu, macOS, and Windows without geospatial system packages. Full geospatial tests currently run on the supported Ubuntu LTS images because GDAL installation is platform-specific. On Windows and macOS, install GDAL through a geospatial distribution such as conda-forge or your platform package manager, then install Python bindings matching that GDAL version.
+
 ## Core Concepts
 ### 1. Defining a Coordinate System
 You can define a coordinate system using a position tuple and an optional reference frame. If no reference is provided, it defaults to the ```GLOBAL_CS```.
