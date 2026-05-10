@@ -8,9 +8,15 @@ on:
       - master
 
 jobs:
-  ubuntu-2404-build:
-    name: Build and test on Ubuntu 24.04
-    runs-on: ubuntu-24.04
+  ubuntu-build:
+    name: Build and test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - ubuntu-24.04
 
     steps:
       - name: Check out repository
@@ -26,14 +32,20 @@ jobs:
         with:
           version: "0.7.22"
 
-      - name: Install Ubuntu GDAL development packages
+      - name: Install Ubuntu geospatial system packages
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends gdal-bin libgdal-dev libspatialindex-dev
-          test "$(gdal-config --version)" = "3.8.4"
+          echo "GDAL_VERSION=$(gdal-config --version)" >> "$GITHUB_ENV"
+          gdal-config --version
 
       - name: Install project with geo dependencies
         run: uv sync --extra geo --dev
+
+      - name: Install matching GDAL Python bindings
+        run: |
+          uv pip install "gdal==${GDAL_VERSION}"
+          uv run python -c "from osgeo import gdal; print(gdal.VersionInfo('--version'))"
 
       - name: Build package
         run: uv build

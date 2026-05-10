@@ -46,10 +46,8 @@ geo = [
     "pyproj>=3.7.2",
     "rioxarray>=0.19.0",
     "aiofiles>=25.1.0",
-    # Ubuntu 24.04 ships GDAL 3.8.4; the Python bindings must match the
-    # installed libgdal version or the build fails during dependency resolution.
-    "gdal==3.8.4; sys_platform == 'linux'",
-    "gdal>=3.11.4; sys_platform != 'linux'",
+    # The GDAL Python bindings must match the system libgdal version.
+    # Install them separately from `gdal-config --version` after system GDAL is present.
     "nest_asyncio",
     "odc-geo",
     "skyfield",
@@ -83,17 +81,6 @@ build-backend = "uv_build"
 # Exclude mypy cache from both sdist and wheel
 source-exclude = [".mypy_cache"]
 wheel-exclude = [".mypy_cache"]
-
-[tool.uv.sources]
-gdal = [
-  { index = "geospatial_wheels", marker = "sys_platform == 'win32'" },
-]
-
-[[tool.uv.index]]
-name = "geospatial_wheels"
-url = "https://nathanjmcdougall.github.io/geospatial-wheels-index/"
-explicit = true
-
 
 [tool.taskipy.tasks]
 format = { cmd = "ruff format ./src/", help = "Format code using ruff" }
