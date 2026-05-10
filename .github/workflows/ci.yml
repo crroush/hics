@@ -37,13 +37,10 @@ jobs:
           auto-update-conda: false
 
       - name: Install native geospatial dependencies
-        run: conda install -y gdal libspatialindex
+        run: conda install -y gdal libspatialindex pip uv
 
       - name: Install Python package dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install uv==0.7.22
-          uv pip install --system ".[geo]"
+        run: uv pip install --system ".[geo]"
 
       - name: Build package
         run: uv build
