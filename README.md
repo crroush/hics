@@ -12,6 +12,8 @@ uv sync --extra geo --dev
 uv pip install "gdal==$(gdal-config --version)"
 ```
 
+`hics` intentionally does not list `gdal` as a normal Python dependency because the correct version depends on the system `libgdal` already installed. If GDAL is missing when geospatial APIs such as `HCS.from_crs(...)` are used, hics raises an actionable `ImportError` with these installation commands instead of failing later with a low-level `osgeo` import or ABI error.
+
 ## Core Concepts
 ### 1. Defining a Coordinate System
 You can define a coordinate system using a position tuple and an optional reference frame. If no reference is provided, it defaults to the ```GLOBAL_CS```.
