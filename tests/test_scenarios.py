@@ -35,7 +35,7 @@ def test_racetrack_regression():
     rctrck_gp.data = rctrck_gp.data.magnitude
 
     # return racetrack
-    xr.testing.assert_allclose(rctrck_gp, previous, rtol=1e-12, atol=1e-6)
+    xr.testing.assert_equal(rctrck_gp, previous)
 
 
 def test_drive_regression():
@@ -63,7 +63,7 @@ def test_drive_regression():
     previous = xr.open_dataarray(TEST_DATA / "drive_gp.nc")
     drivecs_gp.data = drivecs_gp.data.magnitude
     # return drivecs
-    xr.testing.assert_allclose(drivecs_gp, previous, rtol=1e-12, atol=1e-6)
+    xr.testing.assert_equal(drivecs_gp, previous)
 
 
 if __name__ == "__main__":

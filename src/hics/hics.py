@@ -25,17 +25,15 @@ from .datatypes import (
     _QUATERNION_COORDS,
     _QUATERNION_DIM,
 )
-from .geo import HAS_GEO_DEPS, require_geospatial_dependencies
+from .geo import HAS_GEO_DEPS
 
 if HAS_GEO_DEPS:
     from .geo.crs import from_crs
     from .geo.dem import amsl2hagl, geocent2llh
-
-    _wamsl2hagl = wraps_xr(ureg.m, (ureg.radian, ureg.radian, ureg.m))(amsl2hagl)
-else:
-    _wamsl2hagl = None
 if TYPE_CHECKING:
     from pint import Quantity
+
+_wamsl2hagl = wraps_xr(ureg.m, (ureg.radian, ureg.radian, ureg.m))(amsl2hagl)
 
 
 class HCSOrigin:
@@ -399,8 +397,7 @@ class HCS:
     @classmethod
     def from_crs(cls, *args, **kwargs) -> HCS:
         """Alternate constructor using geospatial Coordinate Reference System."""
-        require_geospatial_dependencies()
-        raise ImportError("hics geospatial dependencies are not available.")
+        raise ImportError
 
     def clear_cache(self) -> None:
         """Clear cache by initializing private variables."""

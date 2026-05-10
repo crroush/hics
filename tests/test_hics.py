@@ -148,7 +148,7 @@ def test_interp():
     # # print(cstest.rotation.basemag.time)
     # print(cstest.rotation.interp(time=ts).basemag)
     cstest_interp = cstest.interp(time=ts)
-    xr.testing.assert_allclose(cstest_interp.global_position, cstruth.global_position, rtol=1e-4)
+    xr.testing.assert_allclose(cstest_interp.global_position, cstruth.global_position)
 
 
 def test_common():

@@ -2,8 +2,8 @@
 ```hics``` is a Python package for handling hierarchical coordinate systems (HCS). It allows you to define relative transformations (translation and rotation) between frames and automatically resolves them to global positions (ECEF) or relative positions between any two frames in the tree.
 
 
-## Installation on Ubuntu
-The geospatial extra uses GDAL's Python bindings, which must match the installed `libgdal` version from the operating system. Instead of pinning one Ubuntu release's GDAL version for every Linux user, install Ubuntu's GDAL packages first, sync the Python environment, and then install the matching GDAL Python bindings from `gdal-config --version`.
+## Ubuntu geospatial install note
+GDAL's Python bindings must match the installed system `libgdal` version. On Ubuntu, install system GDAL first, then install the matching Python bindings before using geospatial features:
 
 ```bash
 sudo apt-get update
@@ -12,11 +12,7 @@ uv sync --extra geo --dev
 uv pip install "gdal==$(gdal-config --version)"
 ```
 
-`hics` intentionally does not list `gdal` as a normal Python dependency because the correct version depends on the system `libgdal` already installed. If GDAL is missing when geospatial APIs such as `HCS.from_crs(...)` are used, hics raises an actionable `ImportError` with these installation commands instead of failing later with a low-level `osgeo` import or ABI error.
-
-
-### Cross-platform CI and GDAL support
-The base package is tested on Ubuntu, macOS, and Windows without geospatial system packages. Full geospatial tests currently run on the supported Ubuntu LTS images because GDAL installation is platform-specific. On Windows and macOS, install GDAL through a geospatial distribution such as conda-forge or your platform package manager, then install Python bindings matching that GDAL version.
+The `geo` extra intentionally does not install `gdal` directly because a hard-coded Python GDAL version can fail when it does not match the operating system's `libgdal`.
 
 ## Core Concepts
 ### 1. Defining a Coordinate System

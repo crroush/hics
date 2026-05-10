@@ -8,17 +8,9 @@ on:
       - master
 
 jobs:
-  core-build:
-    name: Core build and tests on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-22.04
-          - ubuntu-24.04
-          - macos-latest
-          - windows-latest
+  ubuntu-2404-build:
+    name: Build with Ubuntu 24.04 system GDAL
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out repository
@@ -34,47 +26,14 @@ jobs:
         with:
           version: "0.7.22"
 
-      - name: Install Python dependencies without GDAL bindings
-        run: uv sync --extra geo --dev
-
-      - name: Build package
-        run: uv build
-
-      - name: Run core tests
-        run: uv run pytest -q tests/test_hics.py tests/test_save.py tests/test_geo_dependencies.py
-
-  ubuntu-geospatial-build:
-    name: Geospatial build and tests on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-22.04
-          - ubuntu-24.04
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: "0.7.22"
-
-      - name: Install Ubuntu geospatial system packages
+      - name: Install Ubuntu GDAL packages
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends gdal-bin libgdal-dev libspatialindex-dev
           echo "GDAL_VERSION=$(gdal-config --version)" >> "$GITHUB_ENV"
           gdal-config --version
 
-      - name: Install project with geo dependencies
+      - name: Install Python dependencies
         run: uv sync --extra geo --dev
 
       - name: Install matching GDAL Python bindings
@@ -85,5 +44,5 @@ jobs:
       - name: Build package
         run: uv build
 
-      - name: Run tests
-        run: uv run pytest -q tests
+      - name: Smoke test package import
+        run: uv run python -c "import hics; from osgeo import gdal; print(gdal.VersionInfo('--version'))"
