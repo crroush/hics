@@ -28,19 +28,23 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Set up conda geospatial environment
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Set up micromamba geospatial environment
+        uses: mamba-org/setup-micromamba@v3
         with:
-          activate-environment: hics-ci
-          python-version: "3.12"
-          channels: conda-forge
-          channel-priority: strict
-          auto-update-conda: false
-
-      - name: Install native geospatial dependencies
-        run: conda install -y gdal libspatialindex pip uv
+          environment-name: hics-ci
+          init-shell: bash
+          condarc: |
+            channels:
+              - conda-forge
+            channel_priority: strict
+          create-args: >-
+            python=3.12
+            gdal
+            libspatialindex
+            pip
+            uv
 
       - name: Install Python package dependencies
         run: uv pip install --system ".[geo]"
