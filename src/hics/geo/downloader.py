@@ -18,7 +18,6 @@ import rasterio
 from loguru import logger
 from rasterio.warp import transform_bounds
 from rtree import index
-from rtree.exceptions import RTreeError
 from tqdm import tqdm
 
 from .config import DEM_SETTINGS
@@ -176,38 +175,11 @@ class GeoTIFFIndex:
         folder : Path
             The root directory containing the GeoTIFF files
         """
-        self._cache_dir: Path | None = None
-        self._INDEXSETUP = False
-        self.metadata_map: dict[int, GeoTIFFMetadata] = {}
+        # Store folder
         self.cache_dir = cache_dir
+        # Ensure cache directory exists
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-    @property
-    def cache_dir(self) -> Path:
-        """Directory containing cached GeoTIFFs and R-tree index files."""
-        if self._cache_dir is None:
-            raise ValueError("GeoTIFF cache directory has not been initialized.")
-        return self._cache_dir
-
-    @cache_dir.setter
-    def cache_dir(self, path: Path | str) -> None:
-        """Update the cache directory and reset index state for the new location."""
-        self._cache_dir = Path(path)
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
-        self.metadata_map = {}
-        self._INDEXSETUP = False
-
-    def _delete_index_files(self) -> None:
-        """Remove persistent R-tree files and metadata for a clean rebuild."""
-        for path in (
-            self.index_base.with_suffix(".dat"),
-            self.index_base.with_suffix(".idx"),
-            self.metadata_map_path,
-        ):
-            try:
-                path.unlink(missing_ok=True)
-            except OSError as error:
-                logger.warning(f"Failed to remove corrupt GeoTIFF index file {path}: {error}")
-        self.metadata_map = {}
         self._INDEXSETUP = False
 
     @property
@@ -256,16 +228,8 @@ class GeoTIFFIndex:
         logger.debug(f"Starting index build/update for {self.cache_dir}...")
         if not self._INDEXSETUP:
             self.setupindex()
-        # Start a new index connection, creating the files if they don't exist.
-        # If libspatialindex cannot open the persisted index, rebuild it from the
-        # cached GeoTIFF files instead of failing every DEM lookup.
-        try:
-            idx = index.Index(str(self.index_base), properties=self.p)
-        except RTreeError as error:
-            logger.warning(f"Rebuilding corrupt GeoTIFF index {self.index_base}: {error}")
-            self._delete_index_files()
-            self.setupindex()
-            idx = index.Index(str(self.index_base), properties=self.p)
+        # Start a new index connection, creating the files if they don't exist
+        idx = index.Index(str(self.index_base), properties=self.p)
 
         # Keep track of existing files to remove deleted ones later
         existing_paths = {v["path"]: (k, tuple(v["bbox"])) for k, v in self.metadata_map.items()}
@@ -369,14 +333,8 @@ class GeoTIFFIndex:
                 logger.error("Index build failed. Cannot perform query.")
                 return []
 
-        # Open the index for querying. Rebuild once if the persisted R-tree is corrupt.
-        try:
-            idx = index.Index(str(self.index_base), properties=self.p)
-        except RTreeError as error:
-            logger.warning(f"Rebuilding corrupt GeoTIFF index {self.index_base}: {error}")
-            self._delete_index_files()
-            self.build_index()
-            idx = index.Index(str(self.index_base), properties=self.p)
+        # Open the index for querying
+        idx = index.Index(str(self.index_base), properties=self.p)
 
         # The bounding box for the query: (min_lon, min_lat, max_lon, max_lat)
         query_bbox = bounding_box.tolist()
